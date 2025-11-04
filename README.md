@@ -46,7 +46,7 @@ InGen Systems YouTube Retrieval Console is a fully-featured YouTube downloader w
 ### ⌨️ Keyboard Shortcuts
 - **F1**: Initiate Download
 - **F2**: Choose Format
-- **F3**: System Diagnostics
+- **F3**: System Diagnostics (check if you got all requirements)
 
 ### 🔧 Smart Features
 - **Auto Dependency Check**: Detects missing packages
@@ -257,6 +257,7 @@ If you find this project useful, please consider giving it a star!
 *"Life finds a way... to download videos."*
 
 </div>
+
 
 
 
