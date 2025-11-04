@@ -1,0 +1,13 @@
+# YouTube Downloader Dependencies
+# yt-dlp is the modern, actively maintained fork of youtube-dl
+yt-dlp>=2023.12.30
+
+# For GUI image handling
+Pillow>=10.0.0
+
+# For progress bars in CLI
+tqdm>=4.66.0
+
+# For better file handling
+pathlib2>=2.3.7
+
