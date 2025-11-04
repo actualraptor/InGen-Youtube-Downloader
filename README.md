@@ -40,7 +40,7 @@ InGen Systems YouTube Retrieval Console is a fully-featured YouTube downloader w
 ### 🎬 Download Capabilities
 - **Multiple Formats**: MP4, MP3, WEBM
 - **Quality Selection**: Choose between best, 1080p, 720p, or audio-only
-- **Progress Tracking**: Dual progress bars with smooth animations
+- **Progress Tracking**: Progress bars with animations
 - **Real-time Console**: Live download status updates
 
 ### ⌨️ Keyboard Shortcuts
@@ -257,6 +257,7 @@ If you find this project useful, please consider giving it a star!
 *"Life finds a way... to download videos."*
 
 </div>
+
 
 
 
