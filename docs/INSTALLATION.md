@@ -78,8 +78,8 @@ Should show Python 3.8 or higher.
 ### Step 3: Download the Project
 
 ```bash
-git clone https://github.com/yourusername/jurassic-youtube-downloader.git
-cd jurassic-youtube-downloader
+git clone https://github.com/actualraptor/InGen-Youtube-Downloader.git
+cd InGen-Youtube-Downloader
 ```
 
 Or download ZIP and extract.

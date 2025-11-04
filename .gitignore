@@ -4,18 +4,27 @@ __pycache__/
 *$py.class
 *.so
 .Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
 .venv/
 venv/
 ENV/
-
-# Downloads
-downloads/
-*.mp4
-*.mp3
-*.webm
-*.mkv
-*.ogg
-*.m4a
+env/
 
 # IDE
 .vscode/
@@ -29,6 +38,23 @@ downloads/
 Thumbs.db
 desktop.ini
 
+# Downloads folder (user content)
+downloads/*.mp4
+downloads/*.mp3
+downloads/*.webm
+downloads/*.m4a
+downloads/*.opus
+!downloads/.gitkeep
+
 # Logs
 *.log
 
+# Environment variables
+.env
+
+# Temporary files
+*.tmp
+*.temp
+
+# User-specific files
+COMMENTS_UPDATED.txt

@@ -48,8 +48,8 @@ Enhancement suggestions are tracked as GitHub issues. When creating an enhanceme
 
 1. **Fork and clone the repository**
 ```bash
-git clone https://github.com/your-username/jurassic-youtube-downloader.git
-cd jurassic-youtube-downloader
+git clone https://github.com/actualraptor/InGen-Youtube-Downloader.git
+cd InGen-Youtube-Downloader
 ```
 
 2. **Create a virtual environment**

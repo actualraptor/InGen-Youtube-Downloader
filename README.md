@@ -66,8 +66,8 @@ InGen Systems YouTube Retrieval Console is a fully-featured YouTube downloader w
 
 1. **Clone the repository**
 ```bash
-git clone https://github.com/yourusername/jurassic-youtube-downloader.git
-cd jurassic-youtube-downloader
+git clone https://github.com/actualraptor/InGen-Youtube-Downloader.git
+cd InGen-Youtube-Downloader
 ```
 
 2. **Run the launcher**
@@ -245,8 +245,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Support
 
-- 🐛 **Issues**: [GitHub Issues](https://github.com/yourusername/jurassic-youtube-downloader/issues)
-- 💬 **Discussions**: [GitHub Discussions](https://github.com/yourusername/jurassic-youtube-downloader/discussions)
+- 🐛 **Issues**: [GitHub Issues](https://github.com/actualraptor/InGen-Youtube-Downloader/issues)
+- 💬 **Discussions**: [GitHub Discussions](https://github.com/actualraptor/InGen-Youtube-Downloader/discussions)
 - 📧 **Email**: your.email@example.com
 
 ---
