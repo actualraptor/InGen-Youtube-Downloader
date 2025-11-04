@@ -1,0 +1,27 @@
+Comments Updated Log
+====================
+
+Date: November 4, 2025
+
+Changes Made:
+- Updated all comments in youtube_downloader_gui.py to be beginner-friendly
+- Removed AI-like formatting (em dashes, formal language)
+- Added clear explanations of what each section does
+- Comments now sound like they were written by a beginner learning Python
+- All comments use simple language and explain the "why" not just the "what"
+
+Key Areas Updated:
+1. Import statements - explained what each library does
+2. __init__ function - explained setup process
+3. setup_ui function - explained each UI element
+4. Image loading - explained the image loading process
+5. Progress bars - explained smooth progress animations
+6. Download functions - explained the download workflow
+7. Dependency checking - explained how we check for installed packages
+8. Themed dialogs - explained why we use custom dialogs
+
+Updated run_gui.bat:
+- Changed to use pythonw.exe instead of python.exe
+- This hides the CMD window when launched via batch file
+- GUI now launches cleanly without console window
+
