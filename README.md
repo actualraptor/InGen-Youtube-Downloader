@@ -137,17 +137,18 @@ Want to personalize your interface?
 
 ### Main Interface
 ```
-Coming soon: Main window with T-Rex and terminal aesthetic
+<img width="1026" height="794" alt="image" src="https://github.com/user-attachments/assets/4aeda213-4f56-4f5b-8993-733ce2a357b8" />
+
 ```
 
 ### Download in Progress
 ```
-Coming soon: Active download with progress bars
+<img width="700" height="78" alt="image" src="https://github.com/user-attachments/assets/ba99a8b3-e857-4570-ac54-792f9ecd2d07" />
 ```
 
 ### System Diagnostics
 ```
-Coming soon: Dependency checker with Jurassic Park theme
+<img width="359" height="106" alt="image" src="https://github.com/user-attachments/assets/2bd6464f-1edc-436c-b490-6790a4f407c0" />
 ```
 
 ---
@@ -264,3 +265,4 @@ If you find this project useful, please consider giving it a star!
 *"Life finds a way... to download videos."*
 
 </div>
+
