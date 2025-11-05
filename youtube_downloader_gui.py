@@ -531,8 +531,8 @@ class JurassicParkDownloader:
         """Show format selection dialog"""
         format_window = tk.Toplevel(self.root)
         format_window.title("Configuration - Format Selection")
-        format_window.geometry("500x400")
         format_window.configure(bg=self.colors['bg'])
+        # Don't set fixed size - let it size naturally, then fit to content
         
         tk.Label(format_window,
                 text="SELECT OUTPUT FORMAT",
@@ -592,6 +592,18 @@ class JurassicParkDownloader:
                  highlightbackground=self.colors['border'],
                  highlightthickness=2,
                  command=format_window.destroy).pack(pady=20)
+        
+        # Update the window to calculate actual size needed, then set it properly
+        format_window.update_idletasks()
+        # Get the required size and add some padding
+        width = format_window.winfo_reqwidth() + 40
+        height = format_window.winfo_reqheight() + 40
+        format_window.geometry(f"{width}x{height}")
+        # Center the window on screen
+        format_window.update_idletasks()
+        x = (format_window.winfo_screenwidth() // 2) - (format_window.winfo_width() // 2)
+        y = (format_window.winfo_screenheight() // 2) - (format_window.winfo_height() // 2)
+        format_window.geometry(f"{width}x{height}+{x}+{y}")
     
     def initiate_download(self):
         """Called when user clicks F1 or INITIATE button"""
