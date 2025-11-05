@@ -19,6 +19,10 @@ import sys
 import subprocess
 # Import importlib to check if modules are installed
 import importlib.util
+# Import base64 to encode/decode images for storage in config
+import base64
+# Import io to handle image data in memory
+import io
 
 
 class JurassicParkDownloader:
@@ -67,6 +71,14 @@ class JurassicParkDownloader:
         self.live_blink_state = True
         self.info_blink_state = True
         self.blinking_enabled = True
+        
+        # Track custom image and GIF animation
+        self.custom_image_data = None
+        self.gif_frames = []
+        self.gif_frame_index = 0
+        self.gif_animation_id = None
+        self.is_gif = False
+        self.hover_button = None
         
         # Build the UI and start the clock
         self.setup_ui()
@@ -226,10 +238,16 @@ class JurassicParkDownloader:
         left_panel.pack_propagate(False)
         
         self.thumbnail_label = tk.Label(left_panel,
-                                       bg=self.colors['dark_green'])
+                                       bg=self.colors['dark_green'],
+                                       cursor='hand2')
         self.thumbnail_label.pack(expand=True)
         
-        # Try to load T-Rex image from img folder (or show dinosaur emoji if not found)
+        # Add hover events to show "Change Image" button
+        self.thumbnail_label.bind('<Enter>', self.on_image_hover_enter)
+        self.thumbnail_label.bind('<Leave>', self.on_image_hover_leave)
+        self.thumbnail_label.bind('<Button-1>', lambda e: self.load_custom_image())
+        
+        # Try to load custom image first, then T-Rex image from img folder (or show dinosaur emoji if not found)
         self.load_trex_image()
         
         # Right panel shows video info and download progress
@@ -316,7 +334,7 @@ class JurassicParkDownloader:
                        darkcolor=self.colors['amber'])
     
     def load_trex_image(self):
-        """Try to load T-Rex image from img folder, use emoji if image not found"""
+        """Try to load custom image from config, then T-Rex image from img folder, use emoji if image not found"""
         # Try to import Pillow library for loading images
         try:
             from PIL import Image, ImageTk
@@ -328,6 +346,13 @@ class JurassicParkDownloader:
                 fg=self.colors['green']
             )
             return
+        
+        # First, try to load custom image from config.ini
+        if self.load_custom_image_from_config():
+            return  # Custom image loaded successfully
+        
+        # Stop any GIF animation if running
+        self.stop_gif_animation()
         
         # Look for T-Rex image in the img folder
         # When running as .exe, bundled files are in sys._MEIPASS
@@ -354,6 +379,12 @@ class JurassicParkDownloader:
                     # Open the image file
                     img = Image.open(image_path)
                     
+                    # Check if it's a GIF
+                    if img.format == 'GIF' and getattr(img, 'is_animated', False):
+                        self.load_gif_animation(image_path)
+                        image_found = True
+                        break
+                    
                     # Make it smaller to fit in the panel (240x240 max)
                     img.thumbnail((240, 240), Image.Resampling.LANCZOS)
                     
@@ -379,6 +410,313 @@ class JurassicParkDownloader:
                 font=('Courier New', 80),
                 fg=self.colors['green']
             )
+    
+    def on_image_hover_enter(self, event):
+        """Show 'Change Image' button when hovering over the image"""
+        if self.hover_button is None:
+            # Create a button that appears on hover
+            self.hover_button = tk.Button(
+                self.thumbnail_label,
+                text="CHANGE IMAGE",
+                font=('Courier New', 9, 'bold'),
+                bg=self.colors['amber'],
+                fg=self.colors['bg'],
+                activebackground=self.colors['green'],
+                activeforeground=self.colors['bg'],
+                highlightbackground=self.colors['border'],
+                highlightthickness=2,
+                relief='raised',
+                bd=3,
+                command=self.load_custom_image
+            )
+            # Position button at bottom center of image
+            self.hover_button.place(relx=0.5, rely=0.95, anchor='s')
+    
+    def on_image_hover_leave(self, event):
+        """Hide 'Change Image' button when mouse leaves the image"""
+        if self.hover_button:
+            self.hover_button.destroy()
+            self.hover_button = None
+    
+    def load_custom_image(self):
+        """Open file dialog to let user select a custom image or GIF"""
+        # Stop any existing GIF animation
+        self.stop_gif_animation()
+        
+        # Open file dialog to select image
+        file_path = filedialog.askopenfilename(
+            title="Select Custom Image or GIF",
+            filetypes=[
+                ("Image files", "*.png *.jpg *.jpeg *.gif *.bmp"),
+                ("PNG files", "*.png"),
+                ("JPEG files", "*.jpg *.jpeg"),
+                ("GIF files", "*.gif"),
+                ("All files", "*.*")
+            ]
+        )
+        
+        if not file_path:
+            return  # User cancelled
+        
+        try:
+            from PIL import Image, ImageTk
+            
+            # Open the image to check if it's valid
+            img = Image.open(file_path)
+            
+            # Check if it's an animated GIF
+            if img.format == 'GIF' and getattr(img, 'is_animated', False):
+                # Load and animate the GIF
+                self.load_gif_animation(Path(file_path))
+                # Save GIF to config
+                self.save_custom_image_to_config(Path(file_path))
+            else:
+                # Load static image
+                img.thumbnail((240, 240), Image.Resampling.LANCZOS)
+                self.trex_photo = ImageTk.PhotoImage(img)
+                self.thumbnail_label.config(image=self.trex_photo, text="")
+                self.is_gif = False
+                
+                # Save image to config as base64
+                self.save_custom_image_to_config(Path(file_path))
+            
+            self.log_console(f"> Custom image loaded: {Path(file_path).name}")
+            
+        except Exception as e:
+            self.show_themed_dialog(
+                "Error",
+                f"Failed to load image:\n{str(e)}",
+                yes_no=False
+            )
+    
+    def load_custom_image_from_config(self):
+        """Load custom image from config.ini if it exists"""
+        try:
+            from PIL import Image, ImageTk
+            
+            if not self.config_file.exists():
+                return False
+            
+            # Read config file
+            custom_image_base64 = None
+            is_gif_flag = False
+            
+            with open(self.config_file, 'r') as f:
+                for line in f:
+                    if line.startswith('custom_image_data='):
+                        custom_image_base64 = line.split('=', 1)[1].strip()
+                    elif line.startswith('custom_image_is_gif='):
+                        is_gif_flag = line.split('=', 1)[1].strip().lower() == 'true'
+            
+            if not custom_image_base64:
+                return False
+            
+            # Decode base64 image data
+            image_data = base64.b64decode(custom_image_base64)
+            image_bytes = io.BytesIO(image_data)
+            
+            # Load image from bytes
+            img = Image.open(image_bytes)
+            
+            if is_gif_flag and getattr(img, 'is_animated', False):
+                # For GIFs, we need to save temporarily and reload (or use BytesIO properly)
+                # Actually, let's reload from the bytes directly
+                image_bytes.seek(0)  # Reset to beginning
+                self.load_gif_from_bytes(image_bytes)
+                return True
+            else:
+                # Static image
+                img.thumbnail((240, 240), Image.Resampling.LANCZOS)
+                self.trex_photo = ImageTk.PhotoImage(img)
+                self.thumbnail_label.config(image=self.trex_photo, text="")
+                self.is_gif = False
+                return True
+                
+        except Exception as e:
+            # If loading fails, just use default image
+            return False
+    
+    def save_custom_image_to_config(self, image_path):
+        """Save custom image to config.ini as base64 encoded data"""
+        try:
+            from PIL import Image
+            
+            # Read image file and encode as base64
+            with open(image_path, 'rb') as f:
+                image_data = base64.b64encode(f.read()).decode('utf-8')
+            
+            # Check if it's actually an animated GIF
+            is_gif = False
+            try:
+                img_check = Image.open(image_path)
+                is_gif = (img_check.format == 'GIF' and getattr(img_check, 'is_animated', False))
+                img_check.close()
+            except:
+                pass
+            
+            # Read existing config
+            config_lines = []
+            if self.config_file.exists():
+                with open(self.config_file, 'r') as f:
+                    config_lines = f.readlines()
+            
+            # Remove old custom_image lines if they exist
+            config_lines = [line for line in config_lines 
+                          if not line.startswith('custom_image_data=') 
+                          and not line.startswith('custom_image_is_gif=')]
+            
+            # Add new custom image data
+            config_lines.append(f'custom_image_data={image_data}\n')
+            config_lines.append(f'custom_image_is_gif={str(is_gif).lower()}\n')
+            
+            # Write back to config file
+            with open(self.config_file, 'w') as f:
+                f.writelines(config_lines)
+                
+        except Exception as e:
+            self.log_console(f"> Warning: Could not save custom image to config: {str(e)}")
+    
+    def load_gif_animation(self, gif_path):
+        """Load a GIF file and set up animation"""
+        try:
+            from PIL import Image, ImageTk
+            
+            # Open GIF
+            img = Image.open(gif_path)
+            
+            if not getattr(img, 'is_animated', False):
+                # Not animated, treat as static image
+                img.thumbnail((240, 240), Image.Resampling.LANCZOS)
+                self.trex_photo = ImageTk.PhotoImage(img)
+                self.thumbnail_label.config(image=self.trex_photo, text="")
+                self.is_gif = False
+                return
+            
+            # Extract all frames
+            self.gif_frames = []
+            self.gif_frame_index = 0
+            self.is_gif = True
+            
+            try:
+                frame_num = 0
+                while True:
+                    # Resize frame to fit panel
+                    frame = img.copy()
+                    frame.thumbnail((240, 240), Image.Resampling.LANCZOS)
+                    frame_photo = ImageTk.PhotoImage(frame)
+                    
+                    # Get duration for this frame (default to 100ms if not specified)
+                    duration = img.info.get('duration', 100)
+                    if duration == 0:
+                        duration = 100  # Prevent division by zero
+                    
+                    self.gif_frames.append((frame_photo, duration))
+                    
+                    frame_num += 1
+                    try:
+                        img.seek(frame_num)
+                    except EOFError:
+                        break
+                        
+            except Exception as e:
+                # If frame extraction fails, just use first frame as static
+                img.seek(0)
+                img.thumbnail((240, 240), Image.Resampling.LANCZOS)
+                self.trex_photo = ImageTk.PhotoImage(img)
+                self.thumbnail_label.config(image=self.trex_photo, text="")
+                self.is_gif = False
+                return
+            
+            # Start animation
+            if self.gif_frames:
+                self.animate_gif()
+                
+        except Exception as e:
+            # If GIF loading fails, just show error
+            self.log_console(f"> Error loading GIF: {str(e)}")
+    
+    def load_gif_from_bytes(self, image_bytes):
+        """Load GIF animation from bytes (for config loading)"""
+        try:
+            from PIL import Image, ImageTk
+            
+            img = Image.open(image_bytes)
+            
+            if not getattr(img, 'is_animated', False):
+                # Not animated
+                img.thumbnail((240, 240), Image.Resampling.LANCZOS)
+                self.trex_photo = ImageTk.PhotoImage(img)
+                self.thumbnail_label.config(image=self.trex_photo, text="")
+                self.is_gif = False
+                return
+            
+            # Extract frames
+            self.gif_frames = []
+            self.gif_frame_index = 0
+            self.is_gif = True
+            
+            try:
+                frame_num = 0
+                while True:
+                    frame = img.copy()
+                    frame.thumbnail((240, 240), Image.Resampling.LANCZOS)
+                    frame_photo = ImageTk.PhotoImage(frame)
+                    
+                    # Get duration for this frame (default to 100ms if not specified)
+                    duration = img.info.get('duration', 100)
+                    if duration == 0:
+                        duration = 100  # Prevent division by zero
+                    
+                    self.gif_frames.append((frame_photo, duration))
+                    
+                    frame_num += 1
+                    try:
+                        img.seek(frame_num)
+                    except EOFError:
+                        break
+                        
+            except Exception as e:
+                # Fallback to first frame
+                img.seek(0)
+                img.thumbnail((240, 240), Image.Resampling.LANCZOS)
+                self.trex_photo = ImageTk.PhotoImage(img)
+                self.thumbnail_label.config(image=self.trex_photo, text="")
+                self.is_gif = False
+                return
+            
+            # Start animation
+            if self.gif_frames:
+                self.animate_gif()
+                
+        except Exception as e:
+            self.log_console(f"> Error loading GIF from config: {str(e)}")
+    
+    def animate_gif(self):
+        """Animate GIF frames by cycling through them"""
+        if not self.is_gif or not self.gif_frames:
+            return
+        
+        # Get current frame
+        frame_photo, duration = self.gif_frames[self.gif_frame_index]
+        
+        # Update image
+        self.thumbnail_label.config(image=frame_photo)
+        self.trex_photo = frame_photo  # Keep reference to prevent garbage collection
+        
+        # Move to next frame (loop back to start)
+        self.gif_frame_index = (self.gif_frame_index + 1) % len(self.gif_frames)
+        
+        # Schedule next frame (duration is in milliseconds)
+        self.gif_animation_id = self.root.after(duration, self.animate_gif)
+    
+    def stop_gif_animation(self):
+        """Stop any running GIF animation"""
+        if self.gif_animation_id:
+            self.root.after_cancel(self.gif_animation_id)
+            self.gif_animation_id = None
+        self.is_gif = False
+        self.gif_frames = []
+        self.gif_frame_index = 0
     
     def load_download_location(self):
         """Load download location from config or ask user"""
