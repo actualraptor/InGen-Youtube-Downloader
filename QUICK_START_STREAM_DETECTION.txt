@@ -1,0 +1,146 @@
+========================================
+  🦖 QUICK START: STREAM DETECTION
+========================================
+
+✅ EXPERIMENTAL BRANCH ACTIVE!
+Your main stable version is safe on the 'main' branch.
+
+========================================
+TL;DR - THE FASTEST WAY
+========================================
+
+1. Paste SVT Play URL: https://www.svtplay.se/video/...
+2. Click: <F5> AUTO-DETECT STREAM
+3. Wait: 30-60 seconds
+4. Click: <F1> INITIATE
+5. Done!
+
+========================================
+FIRST TIME ONLY (5 minutes)
+========================================
+
+When you click F5 the first time:
+→ Will ask to install Playwright
+→ Click YES
+→ Wait 3-5 minutes (~200MB download)
+→ Restart app
+→ Now F5 works instantly!
+
+========================================
+WHAT YOU SEE
+========================================
+
+BEFORE:
+URL Box: https://www.svtplay.se/video/abc123
+
+AFTER (Click F5):
+Console: STREAM DETECTION INITIATED...
+         (wait 30-60 seconds)
+         STREAM DETECTED!
+         
+URL Box: https://svt...master.m3u8
+         ↑ Automatically updated!
+
+THEN (Click F1):
+Downloads the video!
+
+========================================
+BUTTON LAYOUT
+========================================
+
+Row 1: [F1] [Cancel] [F2 Formats] [F3 Diagnostics] [F4 Location]
+
+Row 2: [F5 AUTO-DETECT STREAM (EXPERIMENTAL)]      ← NEW!
+       For blob: URLs and streaming sites
+
+========================================
+TEST URL
+========================================
+
+Any SVT Play video:
+https://www.svtplay.se/video/[video-id]
+
+Or any page with embedded video using blob: URLs
+
+========================================
+TROUBLESHOOTING
+========================================
+
+Problem: "Playwright not installed"
+Fix: Click YES → Wait 5 min → Restart
+
+Problem: "No streams detected"
+Fix: Check if video exists on page
+     Try different video
+     Some sites use DRM (won't work)
+
+Problem: Takes too long
+Fix: It's normal (30-60 sec)
+     Watch console for progress
+
+========================================
+BRANCHES
+========================================
+
+Current: feature/auto-stream-detection ✅ (experimental)
+Stable:  main (working v1.0.0)
+
+Switch back to stable:
+git checkout main
+
+Return to experimental:
+git checkout feature/auto-stream-detection
+
+========================================
+GITHUB
+========================================
+
+View code:
+https://github.com/actualraptor/InGen-Youtube-Downloader/tree/feature/auto-stream-detection
+
+========================================
+WHAT IT DOES TECHNICALLY
+========================================
+
+1. Opens page in invisible Chromium browser
+2. Captures all network traffic
+3. Finds video stream URLs (.m3u8, .mpd, .mp4)
+4. Picks best quality
+5. Updates URL field automatically
+6. You download normally
+
+========================================
+FILES TO READ
+========================================
+
+Simple guide:
+→ HOW_TO_USE_STREAM_DETECTION.txt
+
+Testing guide:
+→ TEST_STREAM_DETECTION.md
+
+Technical details:
+→ EXPERIMENTAL_FEATURE_SUMMARY.md
+
+Complete overview:
+→ BRANCH_SUMMARY.md
+
+========================================
+READY TO TEST!
+========================================
+
+1. The GUI is already running (if you launched it)
+2. Look for the green F5 button
+3. Paste any SVT Play URL
+4. Click F5 and watch the magic!
+
+========================================
+
+"Your scientists were so preoccupied with whether
+they could detect streams automatically,
+they didn't stop to think...
+wait, they should. It's awesome!" 🦕
+
+Main branch = Safe ✅
+This branch = Fun experiment ✅
+
