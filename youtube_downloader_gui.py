@@ -334,7 +334,7 @@ class JurassicParkDownloader:
                        darkcolor=self.colors['amber'])
     
     def scale_image_to_fit(self, img, max_size=(240, 240)):
-        """Scale image to fill the box while maintaining aspect ratio"""
+        """Scale image to fit within the box while maintaining aspect ratio, adding black bars if needed"""
         from PIL import Image
         
         # Get target dimensions
@@ -343,11 +343,11 @@ class JurassicParkDownloader:
         # Get original dimensions
         orig_width, orig_height = img.size
         
-        # Calculate scaling factor to fill the box (cover mode)
-        # Scale by the larger factor so image fills entire box
+        # Calculate scaling factor to fit within the box (contain mode)
+        # Scale by the smaller factor so entire image fits in box
         scale_w = target_width / orig_width
         scale_h = target_height / orig_height
-        scale = max(scale_w, scale_h)  # Use larger scale to fill box
+        scale = min(scale_w, scale_h)  # Use smaller scale to fit within box
         
         # Calculate new dimensions
         new_width = int(orig_width * scale)
@@ -356,16 +356,18 @@ class JurassicParkDownloader:
         # Resize image
         img_resized = img.resize((new_width, new_height), Image.Resampling.LANCZOS)
         
-        # Crop to exact size if needed (center crop)
-        if new_width > target_width or new_height > target_height:
-            left = (new_width - target_width) // 2
-            top = (new_height - target_height) // 2
-            right = left + target_width
-            bottom = top + target_height
-            img_resized = img_resized.crop((left, top, right, bottom))
+        # Create a black background image of the target size
+        # Use the dark green background color to match the panel
+        background = Image.new('RGB', (target_width, target_height), self.colors['dark_green'])
         
-        # If image is smaller than target, it will be centered (no padding needed as label handles it)
-        return img_resized
+        # Calculate position to center the resized image on the background
+        x_offset = (target_width - new_width) // 2
+        y_offset = (target_height - new_height) // 2
+        
+        # Paste the resized image onto the black background (centered)
+        background.paste(img_resized, (x_offset, y_offset))
+        
+        return background
     
     def load_trex_image(self):
         """Try to load custom image from config, then T-Rex image from img folder, use emoji if image not found"""
