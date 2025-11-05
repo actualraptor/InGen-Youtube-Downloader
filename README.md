@@ -26,6 +26,7 @@ InGen Systems YouTube Retrieval Console is a fully-featured YouTube downloader w
 - **User-Friendly**: Themed GUI with keyboard shortcuts and progress tracking
 - **Smart Dependencies**: Automatic dependency checking and installation
 - **No Command Line Required**: Everything works through the GUI
+- **Most importantly**: Being annoyed with online youtube downloaders so wanted my own. 
 
 ---
 
@@ -136,19 +137,10 @@ Want to personalize your interface?
 ## 📸 Screenshots
 
 ### Main Interface
-```
-Coming soon: Main window with T-Rex and terminal aesthetic
-```
 
-### Download in Progress
-```
-Coming soon: Active download with progress bars
-```
 
-### System Diagnostics
-```
-Coming soon: Dependency checker with Jurassic Park theme
-```
+<img width="1087" height="784" alt="image" src="https://github.com/user-attachments/assets/a6b8db06-2f16-418a-89b2-ca293332f453" />
+
 
 ---
 
@@ -240,6 +232,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **Jurassic Park** - For the iconic computer interface inspiration
 - **yt-dlp** - For the powerful YouTube download engine
 - **Python Community** - For the amazing tools and libraries
+- **vibecoding** - For being able to feel like a child discovering the internet for the first time and LLMs to help code. 
 
 ---
 
@@ -247,20 +240,15 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - 🐛 **Issues**: [GitHub Issues](https://github.com/actualraptor/InGen-Youtube-Downloader/issues)
 - 💬 **Discussions**: [GitHub Discussions](https://github.com/actualraptor/InGen-Youtube-Downloader/discussions)
-- 📧 **Email**: your.email@example.com
 
 ---
-
-## ⭐ Star History
-
-If you find this project useful, please consider giving it a star!
 
 ---
 
 <div align="center">
 
-**Made with 🦖 and nostalgia**
+**Made with 🦖, vibes, and nostalgia**
 
-*"Life finds a way... to download videos."*
+*"Life uh... finds a way... to download videos."*
 
 </div>
