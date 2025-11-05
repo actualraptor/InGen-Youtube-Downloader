@@ -1,0 +1,78 @@
+=================================================================
+COPY AND PASTE THIS INTO GITHUB RELEASE DESCRIPTION
+=================================================================
+
+# 🦖 InGen YouTube Downloader - Initial Release
+
+> _"Hold on to your butts!"_ - InGen Systems
+
+## What's New
+
+First public release of the Jurassic Park themed YouTube downloader!
+
+### ✨ Features
+- 🎨 Authentic Jurassic Park retro terminal UI
+- 📥 Download videos in MP4, MP3, and WEBM formats
+- 🔧 Smart dependency installer (installs yt-dlp and FFmpeg via UI)
+- 💾 One-time download location setup
+- 🦕 Customizable T-Rex image
+- 📊 Smooth progress bars with live percentage
+- 🎮 Keyboard shortcuts (F1-F4)
+
+### 📦 What's Included
+- **Standalone .exe** - No Python installation needed!
+- **Bundled T-Rex image** - Customize by adding your own
+- **Smart setup** - Only asks for download location once
+- **Dependency manager** - Installs missing packages through the app
+
+### 🚀 Quick Start
+1. Download `InGen-YouTube-Downloader.exe` below
+2. Run it (first time: choose download location)
+3. Press F3 to install dependencies
+4. Paste a YouTube URL and press F1
+5. Enjoy! 🦖
+
+### 📋 System Requirements
+- Windows 10 or later
+- Internet connection
+- ~150MB free space (including FFmpeg)
+
+### 🎨 Customization
+Want a custom T-Rex? Create an `img` folder next to the .exe and add `trex.png`!
+
+### 🔧 Latest Fixes (v1.0)
+- ✅ First launch dialog now shows YES/NO buttons properly
+- ✅ Added F4 button to change download location anytime
+- ✅ Config file saves persistently (not in temp folder)
+
+### 🐛 Known Issues
+None! This is the first stable release.
+
+### 📖 Full Documentation
+See the [README](https://github.com/actualraptor/InGen-Youtube-Downloader) for complete instructions.
+
+---
+
+**Life finds a way... to download YouTube videos.** 🦕
+
+Enjoy!
+
+=================================================================
+HOW TO CREATE THE RELEASE
+=================================================================
+
+1. Go to: https://github.com/actualraptor/InGen-Youtube-Downloader/releases/new
+
+2. Fill in:
+   - Tag: v1.0.0
+   - Title: v1.0.0 - "Welcome to Jurassic Park" 🦖
+   - Description: Copy the text above
+
+3. Upload file:
+   - Drag and drop: dist\InGen-YouTube-Downloader.exe
+   - Size: 28.2 MB
+
+4. Click "Publish release"
+
+Done! 🎉
+

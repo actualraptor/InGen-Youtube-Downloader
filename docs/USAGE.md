@@ -278,3 +278,4 @@ For more detailed troubleshooting, see [TROUBLESHOOTING.md](TROUBLESHOOTING.md).
 
 *"Life finds a way... to download videos efficiently."* 🦖
 
+

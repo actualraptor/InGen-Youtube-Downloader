@@ -199,3 +199,4 @@ That's it! Drop your T-Rex image in the `img/` folder, name it `trex.png`, and r
 
 **"Life finds a way... to display custom images."** 🦖
 
+

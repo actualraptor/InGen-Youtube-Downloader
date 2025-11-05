@@ -1,0 +1,43 @@
+========================================
+  REBUILD EXE WITH FIXED IMAGE SUPPORT
+========================================
+
+The T-Rex image is now properly configured to be bundled with the .exe!
+
+WHAT WAS FIXED:
+✓ Updated build_exe.spec to include img folder correctly
+✓ Fixed script to look for bundled images in PyInstaller's temp folder
+✓ Image will now load properly when running as .exe
+
+HOW TO REBUILD:
+
+1. Double-click: build_exe.bat
+
+   OR manually run:
+   
+   cd "C:\Scripts\YouTube Downloader"
+   .venv\Scripts\activate
+   pyinstaller build_exe.spec --clean --noconfirm
+
+2. The new .exe will be in: dist\InGen-YouTube-Downloader.exe
+
+3. Test it:
+   - Run the .exe
+   - You should see your T-Rex image (trex.png)
+   - If not, you'll see the 🦖 emoji as fallback
+
+TECHNICAL DETAILS:
+
+When PyInstaller creates an .exe, it bundles all files and extracts them
+to a temporary folder at runtime. This folder path is stored in sys._MEIPASS.
+
+The code now:
+- Checks if running as .exe (sys.frozen)
+- If yes, looks for images in sys._MEIPASS/img/
+- If no, looks in the normal script directory
+
+Your trex.png (2.3MB) will be bundled inside the .exe and extracted when run!
+
+========================================
+
+

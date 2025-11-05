@@ -36,7 +36,16 @@ class JurassicParkDownloader:
         self.dependencies_checked = False
         
         # Figure out where this script is located so we can find images and downloads folder
-        self.script_dir = Path(__file__).parent.absolute()
+        # When running as exe, use the exe directory, otherwise use script directory
+        if getattr(sys, 'frozen', False):
+            # Running as compiled exe - use sys._MEIPASS for bundled resources
+            self.script_dir = Path(getattr(sys, '_MEIPASS', Path(sys.executable).parent))
+            # For persistent config, use the exe's directory, not the temp folder
+            self.exe_dir = Path(sys.executable).parent.absolute()
+        else:
+            # Running as normal Python script
+            self.script_dir = Path(__file__).parent.absolute()
+            self.exe_dir = self.script_dir
         
         # Define the Jurassic Park color scheme (blacks, oranges, and greens)
         self.colors = {
@@ -48,9 +57,10 @@ class JurassicParkDownloader:
             'red': '#FF0000'          # Red for live indicators
         }
         
-        # Create a downloads folder next to this script if it doesnt exist
-        self.download_folder = self.script_dir / "downloads"
-        self.download_folder.mkdir(exist_ok=True)
+        # Load or ask for download folder location
+        # Config file should be in persistent location (not temp folder)
+        self.config_file = self.exe_dir / "config.ini"
+        self.download_folder = self.load_download_location()
         self.is_downloading = False
         
         # Track blinking animations
@@ -189,6 +199,21 @@ class JurassicParkDownloader:
                                        command=self.check_dependencies)
         self.btn_check_deps.pack(side='left', padx=5)
         
+        # F4 button to change download location
+        self.btn_change_location = tk.Button(button_frame,
+                                            text="<F4> CHANGE\nLOCATION",
+                                            font=('Courier New', 12, 'bold'),
+                                            bg=self.colors['bg'],
+                                            fg=self.colors['amber'],
+                                            activebackground=self.colors['amber'],
+                                            activeforeground=self.colors['bg'],
+                                            highlightbackground=self.colors['border'],
+                                            highlightthickness=2,
+                                            width=20,
+                                            height=3,
+                                            command=self.change_download_location)
+        self.btn_change_location.pack(side='left', padx=5)
+        
         # Main info panel (like the screens in Jurassic Park)
         info_frame = tk.Frame(self.root, bg=self.colors['bg'],
                             highlightbackground=self.colors['border'],
@@ -247,31 +272,6 @@ class JurassicParkDownloader:
                                       fg=self.colors['green'])
         self.progress_label.pack(anchor='w')
         
-        # Main progress bar section (the big charging bar)
-        progress_frame = tk.Frame(info_frame, bg=self.colors['bg'])
-        progress_frame.pack(fill='x', padx=10, pady=10)
-        
-        charging_label = tk.Label(progress_frame,
-                                 text="CHARGING...",
-                                 font=('Courier New', 14, 'bold'),
-                                 bg=self.colors['bg'],
-                                 fg=self.colors['amber'])
-        charging_label.pack(anchor='w')
-        
-        # Big progress bar
-        self.progress_bar = ttk.Progressbar(progress_frame,
-                                           mode='determinate',
-                                           length=400)
-        self.progress_bar.pack(fill='x', pady=5)
-        self.setup_progress_style()
-        
-        energy_label = tk.Label(progress_frame,
-                               text="ENERGY LEVELS",
-                               font=('Courier New', 12, 'bold'),
-                               bg=self.colors['bg'],
-                               fg=self.colors['amber'])
-        energy_label.pack()
-        
         # Console output area (like a terminal window)
         console_frame = tk.Frame(self.root, bg=self.colors['bg'],
                                highlightbackground=self.colors['border'],
@@ -303,18 +303,9 @@ class JurassicParkDownloader:
         self.root.bind('<F3>', lambda e: self.check_dependencies())
         
     def setup_progress_style(self):
-        """Set up custom colors for the progress bars"""
+        """Set up custom colors for the progress bar"""
         style = ttk.Style()
         style.theme_use('default')
-        
-        # Main progress bar is green
-        style.configure("green.Horizontal.TProgressbar",
-                       troughcolor=self.colors['bg'],
-                       bordercolor=self.colors['border'],
-                       background=self.colors['green'],
-                       lightcolor=self.colors['green'],
-                       darkcolor=self.colors['green'])
-        self.progress_bar.configure(style="green.Horizontal.TProgressbar")
         
         # Info box progress bar is orange/amber
         style.configure("amber.Horizontal.TProgressbar",
@@ -338,8 +329,15 @@ class JurassicParkDownloader:
             )
             return
         
-        # Look for T-Rex image in the img folder next to this script
-        img_folder = self.script_dir / "img"
+        # Look for T-Rex image in the img folder
+        # When running as .exe, bundled files are in sys._MEIPASS
+        if getattr(sys, 'frozen', False):
+            # Running as exe - look in bundled resources
+            img_folder = Path(getattr(sys, '_MEIPASS', self.script_dir)) / "img"
+        else:
+            # Running as script
+            img_folder = self.script_dir / "img"
+        
         image_paths = [
             img_folder / "trex.png",
             img_folder / "trex.jpg",
@@ -380,6 +378,98 @@ class JurassicParkDownloader:
                 text="🦖",
                 font=('Courier New', 80),
                 fg=self.colors['green']
+            )
+    
+    def load_download_location(self):
+        """Load download location from config or ask user"""
+        # Try to load from config file
+        if self.config_file.exists():
+            try:
+                with open(self.config_file, 'r') as f:
+                    for line in f:
+                        if line.startswith('download_path='):
+                            path = Path(line.split('=', 1)[1].strip())
+                            if path.exists():
+                                return path
+            except:
+                pass
+        
+        # Ask user for download location on first run using themed dialog
+        # Store the result to check what they clicked
+        result = {"response": None}
+        
+        def on_yes():
+            result["response"] = True
+        
+        def on_no():
+            result["response"] = False
+        
+        # Show the dialog and WAIT for user to click a button
+        self.show_themed_dialog(
+            "FIRST TIME INITIALIZATION",
+            ">>> InGen Systems - Isla Nublar Console <<<\n\n"
+            "This appears to be your first time running this system.\n\n"
+            "Would you like to specify a download location?\n\n"
+            "YES: Choose custom folder\n"
+            "NO: Use default location (next to .exe)",
+            dialog_type="info",
+            yes_no=True,
+            yes_callback=on_yes,
+            no_callback=on_no,
+            wait=True  # Wait for dialog to close before continuing
+        )
+        
+        response = result["response"]
+        
+        if response:
+            from tkinter import filedialog
+            chosen_path = filedialog.askdirectory(
+                title="Choose Download Folder",
+                initialdir=str(Path.home() / "Downloads")
+            )
+            if chosen_path:
+                download_path = Path(chosen_path)
+            else:
+                download_path = self.exe_dir / "downloads"
+        else:
+            download_path = self.exe_dir / "downloads"
+        
+        # Create folder if it doesnt exist
+        download_path.mkdir(parents=True, exist_ok=True)
+        
+        # Save to config
+        try:
+            with open(self.config_file, 'w') as f:
+                f.write(f'download_path={download_path}\n')
+        except:
+            pass
+        
+        return download_path
+    
+    def change_download_location(self):
+        """Allow user to change download location"""
+        from tkinter import filedialog
+        new_path = filedialog.askdirectory(
+            title="Choose New Download Folder",
+            initialdir=str(self.download_folder)
+        )
+        
+        if new_path:
+            self.download_folder = Path(new_path)
+            self.download_folder.mkdir(parents=True, exist_ok=True)
+            
+            # Save to config
+            try:
+                with open(self.config_file, 'w') as f:
+                    f.write(f'download_path={self.download_folder}\n')
+            except:
+                pass
+            
+            self.log_console(f"> Download location changed to: {self.download_folder}")
+            self.show_themed_dialog(
+                "Location Updated",
+                f"Downloads will now be saved to:\n{self.download_folder}",
+                dialog_type="info"
             )
     
     def start_clock(self):
@@ -535,7 +625,6 @@ class JurassicParkDownloader:
         self.blinking_enabled = False  # Stop blinking during download
         self.btn_initiate.config(state='disabled')
         self.btn_cancel.config(state='normal')
-        self.progress_bar['value'] = 0
         
         # Update info text to show we're downloading
         self.info_text.config(state='normal')
@@ -658,7 +747,6 @@ class JurassicParkDownloader:
             self.blinking_enabled = True  # Resume blinking after download
             self.btn_initiate.config(state='normal')
             self.btn_cancel.config(state='disabled')
-            self.progress_bar['value'] = 0
             self._last_percent = -1
             
             # Reset info text back to ready state with blinking dot
@@ -743,7 +831,6 @@ class JurassicParkDownloader:
             step = min(0.5, target_percent - current)
             new_value = current + step
             self.info_progress_bar['value'] = new_value
-            self.progress_bar['value'] = new_value
             
             # Update label with smooth percentage
             self.progress_label.config(
@@ -756,7 +843,6 @@ class JurassicParkDownloader:
         else:
             # Final update when we reach target
             self.info_progress_bar['value'] = target_percent
-            self.progress_bar['value'] = target_percent
             self.progress_label.config(
                 text=f"{target_percent:.1f}% - {downloaded_mb:.1f}MB / {total_mb:.1f}MB @ {speed_mb:.1f}MB/s"
             )
@@ -792,14 +878,12 @@ class JurassicParkDownloader:
                 self.smooth_progress_update(percent, downloaded_mb, total_mb, speed_mb)
                 self.root.update_idletasks()
         elif d['status'] == 'finished':
-            self.progress_bar['value'] = 100
             self.info_progress_bar['value'] = 100
             self.progress_label.config(text="100.0% - Complete - Processing file...")
             self._last_percent = -1
             self.log_console("> Download complete, processing file...")
         elif d['status'] == 'error':
             self.log_console("> ERROR during download")
-            self.progress_bar['value'] = 0
             self.info_progress_bar['value'] = 0
             self.progress_label.config(text="0% - Error")
     
@@ -900,12 +984,12 @@ class JurassicParkDownloader:
         
         self.dependencies_checked = True
     
-    def show_themed_dialog(self, title, message, dialog_type="info", yes_no=False, yes_callback=None):
+    def show_themed_dialog(self, title, message, dialog_type="info", yes_no=False, yes_callback=None, no_callback=None, wait=False):
         """Show a Jurassic Park themed popup window instead of ugly Windows dialogs"""
         # Create a new popup window
         dialog = tk.Toplevel(self.root)
         dialog.title(title)
-        dialog.geometry("600x300")
+        dialog.geometry("600x400")  # Made taller so buttons are more visible
         dialog.configure(bg=self.colors['bg'])
         dialog.transient(self.root)
         dialog.grab_set()
@@ -947,8 +1031,18 @@ class JurassicParkDownloader:
         button_frame.pack(fill='x', padx=20, pady=20)
         
         if yes_no:
+            def on_yes_click():
+                dialog.destroy()
+                if yes_callback:
+                    yes_callback()
+            
+            def on_no_click():
+                dialog.destroy()
+                if no_callback:
+                    no_callback()
+            
             tk.Button(button_frame,
-                     text="Yes",
+                     text="YES",
                      font=('Courier New', 12, 'bold'),
                      bg=self.colors['bg'],
                      fg=self.colors['green'],
@@ -957,10 +1051,10 @@ class JurassicParkDownloader:
                      highlightbackground=self.colors['green'],
                      highlightthickness=2,
                      width=15,
-                     command=lambda: [dialog.destroy(), yes_callback() if yes_callback else None]).pack(side='left', padx=10)
+                     command=on_yes_click).pack(side='left', padx=10)
             
             tk.Button(button_frame,
-                     text="No",
+                     text="NO",
                      font=('Courier New', 12, 'bold'),
                      bg=self.colors['bg'],
                      fg=self.colors['amber'],
@@ -969,7 +1063,7 @@ class JurassicParkDownloader:
                      highlightbackground=self.colors['border'],
                      highlightthickness=2,
                      width=15,
-                     command=dialog.destroy).pack(side='left', padx=10)
+                     command=on_no_click).pack(side='left', padx=10)
         else:
             tk.Button(button_frame,
                      text="Ok",
@@ -988,6 +1082,10 @@ class JurassicParkDownloader:
         x = (dialog.winfo_screenwidth() // 2) - (dialog.winfo_width() // 2)
         y = (dialog.winfo_screenheight() // 2) - (dialog.winfo_height() // 2)
         dialog.geometry(f"+{x}+{y}")
+        
+        # If wait=True, block until the dialog is closed (needed for first-time setup)
+        if wait:
+            self.root.wait_window(dialog)
     
     def show_ffmpeg_install_dialog(self):
         """Show Jurassic Park themed FFmpeg installation dialog"""
@@ -1163,7 +1261,6 @@ class JurassicParkDownloader:
             
             for package in packages_to_install:
                 self.log_console(f"> Installing {package}...")
-                self.progress_bar['value'] = 0
                 
                 # Run pip install
                 result = subprocess.run(
@@ -1174,7 +1271,6 @@ class JurassicParkDownloader:
                 
                 if result.returncode == 0:
                     self.log_console(f">   {package} .............. INSTALLED")
-                    self.progress_bar['value'] = 100
                 else:
                     self.log_console(f">   {package} .............. FAILED")
                     self.log_console(f">   Error: {result.stderr[:100]}")
@@ -1205,7 +1301,6 @@ class JurassicParkDownloader:
             # Re-enable buttons
             self.btn_check_deps.config(state='normal')
             self.btn_initiate.config(state='normal')
-            self.progress_bar['value'] = 0
 
 
 def main():

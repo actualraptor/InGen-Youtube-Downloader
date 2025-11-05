@@ -30,3 +30,4 @@ Add any other context or screenshots about the feature request here.
 - [ ] This feature aligns with the project's goals
 - [ ] I would be willing to contribute to this feature
 
+
