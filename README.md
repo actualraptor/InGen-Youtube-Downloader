@@ -136,19 +136,10 @@ Want to personalize your interface?
 ## 📸 Screenshots
 
 ### Main Interface
-```
-Coming soon: Main window with T-Rex and terminal aesthetic
-```
 
-### Download in Progress
-```
-Coming soon: Active download with progress bars
-```
 
-### System Diagnostics
-```
-Coming soon: Dependency checker with Jurassic Park theme
-```
+<img width="1087" height="784" alt="image" src="https://github.com/user-attachments/assets/a6b8db06-2f16-418a-89b2-ca293332f453" />
+
 
 ---
 
