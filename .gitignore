@@ -65,3 +65,6 @@ archive_old_files/
 archive_*/
 cleanup.bat
 archive_files.ps1
+
+# Test/experimental branch folder
+Test/

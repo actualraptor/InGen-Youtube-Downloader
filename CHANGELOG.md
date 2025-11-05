@@ -12,6 +12,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Download queue system (planned)
 - Subtitle download option (planned)
 
+## [1.1.0] - 2025-01-XX
+
+### Added
+- 🖼️ Custom image/GIF support - hover over image to change it
+- 📸 Click image or button to load custom PNG/JPG/GIF
+- 💾 Images saved to config - no need to keep original file
+- 🎬 Animated GIF support with looping
+- 📐 Smart image scaling - fits box with bars if needed (no cropping)
+
+### Changed
+- Image scaling now fits within box instead of cropping
+- Wider/taller images show dark green bars instead of being cut off
+- Format button made slightly narrower to fit change location button
+
+### Fixed
+- Format selection window now auto-sizes properly
+- Change location button displays fully without being cut off
+
 ## [1.0.0] - 2025-11-06
 
 ### Added
@@ -103,5 +121,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 *"Life finds a way... to improve."* 🦖
+
 
 
