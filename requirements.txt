@@ -11,3 +11,6 @@ tqdm>=4.66.0
 # For better file handling
 pathlib2>=2.3.7
 
+# For automatic stream detection (EXPERIMENTAL)
+playwright>=1.40.0
+

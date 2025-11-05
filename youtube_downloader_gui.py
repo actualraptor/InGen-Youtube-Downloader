@@ -214,6 +214,33 @@ class JurassicParkDownloader:
                                             command=self.change_download_location)
         self.btn_change_location.pack(side='left', padx=5)
         
+        # Second row of buttons for experimental features
+        button_frame2 = tk.Frame(self.root, bg=self.colors['bg'])
+        button_frame2.pack(fill='x', padx=15, pady=10)
+        
+        # F5 button to auto-detect stream URLs (EXPERIMENTAL)
+        self.btn_detect_stream = tk.Button(button_frame2,
+                                           text="<F5> AUTO-DETECT\nSTREAM (EXPERIMENTAL)",
+                                           font=('Courier New', 11, 'bold'),
+                                           bg=self.colors['dark_green'],
+                                           fg=self.colors['green'],
+                                           activebackground=self.colors['green'],
+                                           activeforeground=self.colors['bg'],
+                                           highlightbackground=self.colors['green'],
+                                           highlightthickness=2,
+                                           width=35,
+                                           height=3,
+                                           command=self.auto_detect_stream)
+        self.btn_detect_stream.pack(side='left', padx=5)
+        
+        # Info label for stream detection
+        stream_info_label = tk.Label(button_frame2,
+                                    text="For blob: URLs and streaming sites (SVT Play, etc.)",
+                                    font=('Courier New', 9),
+                                    bg=self.colors['bg'],
+                                    fg=self.colors['amber'])
+        stream_info_label.pack(side='left', padx=15)
+        
         # Main info panel (like the screens in Jurassic Park)
         info_frame = tk.Frame(self.root, bg=self.colors['bg'],
                             highlightbackground=self.colors['border'],
@@ -1299,6 +1326,242 @@ class JurassicParkDownloader:
         
         finally:
             # Re-enable buttons
+            self.btn_check_deps.config(state='normal')
+            self.btn_initiate.config(state='normal')
+    
+    def auto_detect_stream(self):
+        """
+        Automatically detect the real stream URL from a page
+        Useful for sites that use blob: URLs like SVT Play
+        """
+        # Get the URL from the input
+        page_url = self.url_entry.get("1.0", "end-1c").strip()
+        
+        if not page_url:
+            self.show_themed_dialog(
+                "No URL Provided",
+                "Please enter the webpage URL where the video is located.\n\n"
+                "Example:\n"
+                "https://www.svtplay.se/video/...",
+                dialog_type="warning"
+            )
+            return
+        
+        # Check if playwright is installed
+        if not self.check_module_installed('playwright'):
+            self.show_themed_dialog(
+                "Playwright Required",
+                "Stream auto-detection requires Playwright.\n\n"
+                "Would you like to install it now?\n\n"
+                "This will also download Chromium browser (~200MB).",
+                dialog_type="warning",
+                yes_no=True,
+                yes_callback=self.install_playwright
+            )
+            return
+        
+        # Disable buttons during detection
+        self.btn_detect_stream.config(state='disabled')
+        self.btn_initiate.config(state='disabled')
+        
+        # Log start of detection
+        self.log_console("> ")
+        self.log_console("> ====================================")
+        self.log_console("> STREAM DETECTION INITIATED")
+        self.log_console("> ====================================")
+        self.log_console("> ")
+        self.log_console(f"> Target URL: {page_url[:60]}...")
+        self.log_console("> ")
+        self.log_console("> Opening page in headless browser...")
+        self.log_console("> Intercepting network requests...")
+        self.log_console("> This may take 30-60 seconds...")
+        self.log_console("> ")
+        
+        # Run detection in thread so GUI doesn't freeze
+        thread = threading.Thread(target=self._detect_stream_thread, args=(page_url,))
+        thread.daemon = True
+        thread.start()
+    
+    def _detect_stream_thread(self, page_url):
+        """Thread function to detect stream URL"""
+        try:
+            # Import the stream detector
+            from stream_detector import StreamDetector
+            
+            detector = StreamDetector()
+            
+            # Run the detection
+            self.log_console("> Analyzing page...")
+            result = detector.detect_stream_url(page_url, timeout=60)
+            
+            if result and result.get('url'):
+                # Success! We found the stream
+                self.log_console("> ")
+                self.log_console("> ====================================")
+                self.log_console("> STREAM DETECTED!")
+                self.log_console("> ====================================")
+                self.log_console("> ")
+                self.log_console(f"> Stream Type: {result['type'].upper()}")
+                self.log_console(f"> Stream URL: {result['url'][:80]}...")
+                self.log_console("> ")
+                self.log_console(f"> Found {len(result['all_streams'])} total stream(s)")
+                self.log_console("> ")
+                
+                # Replace the URL in the input field with the detected stream
+                self.url_entry.delete("1.0", "end")
+                self.url_entry.insert("1.0", result['url'])
+                
+                self.log_console("> URL updated! You can now click INITIATE to download.")
+                self.log_console("> ")
+                
+                self.show_themed_dialog(
+                    "Stream Detected",
+                    f"✓ Successfully detected {result['type'].upper()} stream!\n\n"
+                    f"URL has been updated in the input field.\n\n"
+                    f"Click INITIATE to start download.",
+                    dialog_type="info"
+                )
+            
+            elif result and result.get('error'):
+                # Error occurred
+                self.log_console("> ")
+                self.log_console("> ====================================")
+                self.log_console("> DETECTION FAILED")
+                self.log_console("> ====================================")
+                self.log_console("> ")
+                self.log_console(f"> Error: {result['error']}")
+                self.log_console("> ")
+                
+                self.show_themed_dialog(
+                    "Detection Failed",
+                    f"✗ Could not detect stream:\n\n{result['error']}\n\n"
+                    "Tips:\n"
+                    "• Make sure the page contains a video\n"
+                    "• Check your internet connection\n"
+                    "• Try refreshing the page URL",
+                    dialog_type="error"
+                )
+            
+            else:
+                # No streams found
+                self.log_console("> ")
+                self.log_console("> ====================================")
+                self.log_console("> NO STREAMS DETECTED")
+                self.log_console("> ====================================")
+                self.log_console("> ")
+                self.log_console("> No video streams were found on the page.")
+                self.log_console("> The page may not contain a video,")
+                self.log_console("> or it may use a different streaming method.")
+                self.log_console("> ")
+                
+                self.show_themed_dialog(
+                    "No Streams Found",
+                    "✗ No video streams detected on this page.\n\n"
+                    "This could mean:\n"
+                    "• The page doesn't have a video\n"
+                    "• The video is behind a login/paywall\n"
+                    "• The site uses DRM protection\n\n"
+                    "Try using DevTools Network tab manually.",
+                    dialog_type="warning"
+                )
+        
+        except Exception as e:
+            self.log_console("> ")
+            self.log_console(f"> ERROR: {str(e)}")
+            self.log_console("> ")
+            
+            self.show_themed_dialog(
+                "Detection Error",
+                f"✗ Stream detection failed:\n\n{str(e)}",
+                dialog_type="error"
+            )
+        
+        finally:
+            # Re-enable buttons
+            self.btn_detect_stream.config(state='normal')
+            self.btn_initiate.config(state='normal')
+    
+    def install_playwright(self):
+        """Install Playwright and its browser binaries"""
+        self.log_console("> ")
+        self.log_console("> ====================================")
+        self.log_console("> PLAYWRIGHT INSTALLATION INITIATED")
+        self.log_console("> ====================================")
+        self.log_console("> ")
+        self.log_console("> Step 1: Installing Playwright Python package...")
+        self.log_console("> ")
+        
+        # Disable buttons
+        self.btn_detect_stream.config(state='disabled')
+        self.btn_check_deps.config(state='disabled')
+        self.btn_initiate.config(state='disabled')
+        
+        # Run in thread
+        thread = threading.Thread(target=self._install_playwright_thread)
+        thread.daemon = True
+        thread.start()
+    
+    def _install_playwright_thread(self):
+        """Thread to install Playwright"""
+        try:
+            # Install playwright package
+            result = subprocess.run(
+                [sys.executable, '-m', 'pip', 'install', 'playwright'],
+                capture_output=True,
+                text=True,
+                timeout=300
+            )
+            
+            if result.returncode == 0:
+                self.log_console("> ✓ Playwright package installed")
+                self.log_console("> ")
+                self.log_console("> Step 2: Installing Chromium browser...")
+                self.log_console("> This may take several minutes (~200MB download)...")
+                self.log_console("> ")
+                
+                # Install browser binaries
+                result2 = subprocess.run(
+                    ['playwright', 'install', 'chromium'],
+                    capture_output=True,
+                    text=True,
+                    timeout=600  # 10 minutes for browser download
+                )
+                
+                if result2.returncode == 0:
+                    self.log_console("> ✓ Chromium browser installed")
+                    self.log_console("> ")
+                    self.log_console("> ====================================")
+                    self.log_console("> PLAYWRIGHT INSTALLED SUCCESSFULLY")
+                    self.log_console("> ====================================")
+                    self.log_console("> Stream detection is now available!")
+                    self.log_console("> ")
+                    
+                    self.show_themed_dialog(
+                        "Installation Complete",
+                        "✓ Playwright installed successfully!\n\n"
+                        "Stream auto-detection is now ready.\n\n"
+                        "Click <F5> AUTO-DETECT STREAM to use it.",
+                        dialog_type="info"
+                    )
+                else:
+                    raise Exception(f"Browser installation failed: {result2.stderr[:200]}")
+            else:
+                raise Exception(f"Playwright installation failed: {result.stderr[:200]}")
+        
+        except Exception as e:
+            self.log_console("> ")
+            self.log_console(f"> ERROR: {str(e)}")
+            self.log_console("> ")
+            
+            self.show_themed_dialog(
+                "Installation Failed",
+                f"✗ Playwright installation failed:\n\n{str(e)}",
+                dialog_type="error"
+            )
+        
+        finally:
+            # Re-enable buttons
+            self.btn_detect_stream.config(state='normal')
             self.btn_check_deps.config(state='normal')
             self.btn_initiate.config(state='normal')
 
