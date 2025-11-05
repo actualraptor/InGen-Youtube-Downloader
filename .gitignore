@@ -58,3 +58,10 @@ downloads/*.opus
 
 # User-specific files
 COMMENTS_UPDATED.txt
+config.ini
+
+# Archives and cleanup scripts
+archive_old_files/
+archive_*/
+cleanup.bat
+archive_files.ps1
