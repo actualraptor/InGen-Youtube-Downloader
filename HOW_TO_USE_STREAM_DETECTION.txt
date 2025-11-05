@@ -1,0 +1,236 @@
+========================================
+  🦖 AUTOMATIC STREAM DETECTION
+  FOR YOUR FRIEND!
+========================================
+
+This is an EXPERIMENTAL feature on a separate branch.
+Your main stable version is completely safe!
+
+========================================
+WHAT IT DOES
+========================================
+
+Automatically finds the REAL video URL from pages that
+use "blob:" URLs (like SVT Play).
+
+No more manually searching in DevTools Network tab!
+
+========================================
+FOR YOUR FRIEND - SIMPLE STEPS
+========================================
+
+STEP 1: GET THE CODE
+--------------------
+Option A - Download ZIP:
+1. Go to: https://github.com/actualraptor/InGen-Youtube-Downloader
+2. Click "Code" → "Download ZIP"
+3. Extract it
+
+Option B - Git Clone (if you have Git):
+git clone https://github.com/actualraptor/InGen-Youtube-Downloader
+cd InGen-Youtube-Downloader
+git checkout feature/auto-stream-detection
+
+
+STEP 2: FIND A VIDEO
+---------------------
+1. Go to SVT Play website
+2. Find any video you want
+3. Copy the page URL (example):
+   https://www.svtplay.se/video/abc123
+
+
+STEP 3: FIRST TIME SETUP (One Time Only)
+-----------------------------------------
+1. Run the app (double-click run_gui.bat)
+2. Paste the video URL
+3. Click <F5> AUTO-DETECT STREAM
+4. It will ask to install Playwright
+5. Click YES
+6. Wait 3-5 minutes (downloads ~200MB)
+7. Close and restart the app
+
+
+STEP 4: DOWNLOAD A VIDEO
+-------------------------
+1. Paste SVT Play URL in the box
+2. Click <F5> AUTO-DETECT STREAM
+3. Wait 30-60 seconds (watch the console)
+4. URL will change to a .m3u8 stream
+5. Click <F1> INITIATE to download!
+
+
+========================================
+WHAT YOU'LL SEE
+========================================
+
+Console will show:
+> ====================================
+> STREAM DETECTION INITIATED
+> ====================================
+> 
+> Opening page in headless browser...
+> Intercepting network requests...
+> This may take 30-60 seconds...
+> 
+> Analyzing page...
+> 
+> ====================================
+> STREAM DETECTED!
+> ====================================
+> 
+> Stream Type: M3U8
+> Stream URL: https://...master.m3u8
+> 
+> URL updated! You can now click INITIATE to download.
+
+
+========================================
+WHAT IT WORKS WITH
+========================================
+
+✅ SVT Play (Swedish TV)
+✅ Public streaming sites
+✅ HLS/DASH streams
+✅ blob: URL video players
+
+❌ Netflix, Disney+ (DRM protected)
+❌ Login-required content
+❌ Geo-blocked content
+
+
+========================================
+TROUBLESHOOTING
+========================================
+
+"Playwright not installed"
+→ Click YES to install
+→ Wait 3-5 minutes
+→ Restart app
+
+"No streams detected"
+→ Check if page has a video
+→ Make sure it's not login-protected
+→ Try a different video
+
+"Takes too long"
+→ It's normal (30-60 seconds)
+→ Watch console for progress
+
+"Download fails after detection"
+→ Install FFmpeg via F3 button
+→ Try different format (MP4/WEBM)
+
+
+========================================
+HOW IT WORKS TECHNICALLY
+========================================
+
+1. Opens the SVT Play page in invisible Chromium browser
+2. Watches ALL network traffic
+3. Finds video stream URLs (.m3u8, .mpd, .mp4)
+4. Picks the best quality stream
+5. Updates your URL field
+6. You download it normally
+
+
+========================================
+BRANCHES EXPLAINED
+========================================
+
+MAIN BRANCH (Stable):
+- Normal YouTube downloader
+- Works perfectly
+- No stream detection
+
+EXPERIMENTAL BRANCH (This one):
+- Everything from main branch
+- PLUS automatic stream detection
+- PLUS Playwright integration
+- Safe to test!
+
+
+Switch between them:
+git checkout main                      # Stable
+git checkout feature/auto-stream-detection  # Experimental
+
+
+========================================
+REQUIREMENTS
+========================================
+
+First Time:
+- Internet connection
+- ~200MB free space (for Chromium)
+- 5 minutes for installation
+
+After Installation:
+- ~1 minute per video detection
+- Works offline (after Playwright installed)
+
+
+========================================
+GITHUB
+========================================
+
+View the code:
+https://github.com/actualraptor/InGen-Youtube-Downloader/tree/feature/auto-stream-detection
+
+Create Pull Request (when ready):
+https://github.com/actualraptor/InGen-Youtube-Downloader/pull/new/feature/auto-stream-detection
+
+Full documentation:
+- EXPERIMENTAL_FEATURE_SUMMARY.md
+- TEST_STREAM_DETECTION.md
+
+
+========================================
+TELL YOUR FRIEND
+========================================
+
+"Hey! I made a version that automatically finds
+the real video URL from SVT Play!
+
+Just paste the page URL, click F5, wait 1 minute,
+and it finds the stream for you.
+
+No more searching in DevTools!"
+
+
+========================================
+SAFETY & PRIVACY
+========================================
+
+✅ Runs locally on your computer
+✅ No data sent to any server
+✅ Open source code
+✅ Only captures network requests
+✅ Chromium runs in isolated mode
+
+❌ Doesn't crack DRM
+❌ Doesn't store personal data
+❌ Doesn't bypass paywalls
+
+
+========================================
+WHAT'S NEXT?
+========================================
+
+Test it!
+→ Try different SVT Play videos
+→ See if it works for your friend
+→ Report any issues
+
+If it works well:
+→ We can merge to main branch
+→ Make it part of stable version
+→ Create new .exe release
+
+
+========================================
+
+"Life finds a way... to detect streams." 🦕
+
+Your main version is safe on the 'main' branch!
+This is just a fun experiment! 🧪
+
