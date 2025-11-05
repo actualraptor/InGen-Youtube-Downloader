@@ -179,7 +179,7 @@ class JurassicParkDownloader:
                                 fg=self.colors['amber'],
                                 highlightbackground=self.colors['border'],
                                 highlightthickness=2,
-                                width=30,
+                                width=24,
                                 height=3,
                                 command=self.show_format_options)
         format_label.pack(side='left', padx=5)
