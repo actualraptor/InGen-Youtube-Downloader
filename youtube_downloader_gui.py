@@ -333,6 +333,40 @@ class JurassicParkDownloader:
                        lightcolor=self.colors['amber'],
                        darkcolor=self.colors['amber'])
     
+    def scale_image_to_fit(self, img, max_size=(240, 240)):
+        """Scale image to fill the box while maintaining aspect ratio"""
+        from PIL import Image
+        
+        # Get target dimensions
+        target_width, target_height = max_size
+        
+        # Get original dimensions
+        orig_width, orig_height = img.size
+        
+        # Calculate scaling factor to fill the box (cover mode)
+        # Scale by the larger factor so image fills entire box
+        scale_w = target_width / orig_width
+        scale_h = target_height / orig_height
+        scale = max(scale_w, scale_h)  # Use larger scale to fill box
+        
+        # Calculate new dimensions
+        new_width = int(orig_width * scale)
+        new_height = int(orig_height * scale)
+        
+        # Resize image
+        img_resized = img.resize((new_width, new_height), Image.Resampling.LANCZOS)
+        
+        # Crop to exact size if needed (center crop)
+        if new_width > target_width or new_height > target_height:
+            left = (new_width - target_width) // 2
+            top = (new_height - target_height) // 2
+            right = left + target_width
+            bottom = top + target_height
+            img_resized = img_resized.crop((left, top, right, bottom))
+        
+        # If image is smaller than target, it will be centered (no padding needed as label handles it)
+        return img_resized
+    
     def load_trex_image(self):
         """Try to load custom image from config, then T-Rex image from img folder, use emoji if image not found"""
         # Try to import Pillow library for loading images
@@ -385,8 +419,8 @@ class JurassicParkDownloader:
                         image_found = True
                         break
                     
-                    # Make it smaller to fit in the panel (240x240 max)
-                    img.thumbnail((240, 240), Image.Resampling.LANCZOS)
+                    # Scale image to fill the box (240x240)
+                    img = self.scale_image_to_fit(img, (240, 240))
                     
                     # You can add a green tint if you want (commented out)
                     # img = img.convert('L')  # Convert to grayscale first
@@ -471,8 +505,8 @@ class JurassicParkDownloader:
                 # Save GIF to config
                 self.save_custom_image_to_config(Path(file_path))
             else:
-                # Load static image
-                img.thumbnail((240, 240), Image.Resampling.LANCZOS)
+                # Load static image - scale to fill box
+                img = self.scale_image_to_fit(img, (240, 240))
                 self.trex_photo = ImageTk.PhotoImage(img)
                 self.thumbnail_label.config(image=self.trex_photo, text="")
                 self.is_gif = False
@@ -525,8 +559,8 @@ class JurassicParkDownloader:
                 self.load_gif_from_bytes(image_bytes)
                 return True
             else:
-                # Static image
-                img.thumbnail((240, 240), Image.Resampling.LANCZOS)
+                # Static image - scale to fill box
+                img = self.scale_image_to_fit(img, (240, 240))
                 self.trex_photo = ImageTk.PhotoImage(img)
                 self.thumbnail_label.config(image=self.trex_photo, text="")
                 self.is_gif = False
@@ -585,8 +619,8 @@ class JurassicParkDownloader:
             img = Image.open(gif_path)
             
             if not getattr(img, 'is_animated', False):
-                # Not animated, treat as static image
-                img.thumbnail((240, 240), Image.Resampling.LANCZOS)
+                # Not animated, treat as static image - scale to fill box
+                img = self.scale_image_to_fit(img, (240, 240))
                 self.trex_photo = ImageTk.PhotoImage(img)
                 self.thumbnail_label.config(image=self.trex_photo, text="")
                 self.is_gif = False
@@ -600,9 +634,9 @@ class JurassicParkDownloader:
             try:
                 frame_num = 0
                 while True:
-                    # Resize frame to fit panel
+                    # Resize frame to fill panel
                     frame = img.copy()
-                    frame.thumbnail((240, 240), Image.Resampling.LANCZOS)
+                    frame = self.scale_image_to_fit(frame, (240, 240))
                     frame_photo = ImageTk.PhotoImage(frame)
                     
                     # Get duration for this frame (default to 100ms if not specified)
@@ -621,7 +655,7 @@ class JurassicParkDownloader:
             except Exception as e:
                 # If frame extraction fails, just use first frame as static
                 img.seek(0)
-                img.thumbnail((240, 240), Image.Resampling.LANCZOS)
+                img = self.scale_image_to_fit(img, (240, 240))
                 self.trex_photo = ImageTk.PhotoImage(img)
                 self.thumbnail_label.config(image=self.trex_photo, text="")
                 self.is_gif = False
@@ -643,8 +677,8 @@ class JurassicParkDownloader:
             img = Image.open(image_bytes)
             
             if not getattr(img, 'is_animated', False):
-                # Not animated
-                img.thumbnail((240, 240), Image.Resampling.LANCZOS)
+                # Not animated - scale to fill box
+                img = self.scale_image_to_fit(img, (240, 240))
                 self.trex_photo = ImageTk.PhotoImage(img)
                 self.thumbnail_label.config(image=self.trex_photo, text="")
                 self.is_gif = False
@@ -659,7 +693,7 @@ class JurassicParkDownloader:
                 frame_num = 0
                 while True:
                     frame = img.copy()
-                    frame.thumbnail((240, 240), Image.Resampling.LANCZOS)
+                    frame = self.scale_image_to_fit(frame, (240, 240))
                     frame_photo = ImageTk.PhotoImage(frame)
                     
                     # Get duration for this frame (default to 100ms if not specified)
@@ -678,7 +712,7 @@ class JurassicParkDownloader:
             except Exception as e:
                 # Fallback to first frame
                 img.seek(0)
-                img.thumbnail((240, 240), Image.Resampling.LANCZOS)
+                img = self.scale_image_to_fit(img, (240, 240))
                 self.trex_photo = ImageTk.PhotoImage(img)
                 self.thumbnail_label.config(image=self.trex_photo, text="")
                 self.is_gif = False
