@@ -53,7 +53,7 @@ InGen Systems YouTube Retrieval Console is a fully-featured YouTube downloader w
 - **Auto Dependency Check**: Detects missing packages
 - **In-App Installation**: Install yt-dlp, Pillow, and FFmpeg from within the app
 - **FFmpeg Integration**: Optional audio conversion support
-- **Custom Image Support**: Add your own T-Rex image to the interface
+- **Custom Image/GIF Support**: Hover over the image to change it - supports PNG, JPG, GIF with looping animations
 
 ---
 
